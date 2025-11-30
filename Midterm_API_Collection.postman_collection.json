@@ -1,0 +1,512 @@
+{
+	"info": {
+		"_postman_id": "midterm-api-collection",
+		"name": "Midterm API Collection",
+		"description": "Midterm projesi için tüm API endpoint'lerini içeren koleksiyon.\n\n**Önemli Notlar:**\n- Korunan endpoint'ler için önce Login yapıp token alın\n- Token'ı `Authorization` header'ına `Bearer <token>` formatında ekleyin\n- Mobile query-bill endpoint'i günlük 3 istek limiti ile sınırlıdır",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"description": "Kimlik doğrulama endpoint'leri",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('token', jsonData.token);",
+									"        console.log('Token saved to collection variables');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Kullanıcı girişi yaparak JWT token alır.\n\n**Not:** Başarılı giriş sonrası token otomatik olarak collection variable'a kaydedilir."
+					},
+					"response": [
+						{
+							"name": "Successful Login",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"testuser\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login",
+									"host": ["{{baseUrl}}"],
+									"path": ["auth", "login"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bank",
+			"description": "Banka API endpoint'leri (Protected)",
+			"item": [
+				{
+					"name": "Query Unpaid Bills",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscriberNo\": \"1001\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/bank/query-bill",
+							"host": ["{{baseUrl}}"],
+							"path": ["bank", "query-bill"]
+						},
+						"description": "Belirtilen abone numarasına ait ödenmemiş faturaları sorgular.\n\n**Gerekli Parametreler:**\n- `subscriberNo`: Abone numarası\n\n**Authorization:** Bearer Token gerekli"
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscriberNo\": \"1001\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/bank/query-bill",
+									"host": ["{{baseUrl}}"],
+									"path": ["bank", "query-bill"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"unpaidBills\": []\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Mobile",
+			"description": "Mobil uygulama API endpoint'leri (Protected)",
+			"item": [
+				{
+					"name": "Query Bill (Summary)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mobile/query-bill",
+							"host": ["{{baseUrl}}"],
+							"path": ["mobile", "query-bill"]
+						},
+						"description": "Belirtilen abone ve aya ait fatura özetini sorgular.\n\n**Gerekli Parametreler:**\n- `subscriberNo`: Abone numarası\n- `month`: Ay (format: YYYY-MM)\n\n**Authorization:** Bearer Token gerekli\n\n**Rate Limit:** Günlük 3 istek (abone başına)"
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/mobile/query-bill",
+									"host": ["{{baseUrl}}"],
+									"path": ["mobile", "query-bill"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"billTotal\": 150.50,\n    \"paidStatus\": \"unpaid\"\n}"
+						},
+						{
+							"name": "Rate Limit Exceeded",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/mobile/query-bill",
+									"host": ["{{baseUrl}}"],
+									"path": ["mobile", "query-bill"]
+								}
+							},
+							"status": "Too Many Requests",
+							"code": 429,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"error\": \"Daily limit exceeded (Gateway Blocked)\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Query Bill (Detailed)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/mobile/query-bill-detailed?page=1&limit=10",
+							"host": ["{{baseUrl}}"],
+							"path": ["mobile", "query-bill-detailed"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Sayfa numarası (varsayılan: 1)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Sayfa başına sonuç sayısı (varsayılan: 10)"
+								}
+							]
+						},
+						"description": "Belirtilen abone ve aya ait detaylı fatura bilgilerini sayfalama ile sorgular.\n\n**Gerekli Parametreler:**\n- `subscriberNo`: Abone numarası\n- `month`: Ay (format: YYYY-MM)\n\n**Query Parametreleri:**\n- `page`: Sayfa numarası (opsiyonel, varsayılan: 1)\n- `limit`: Sayfa başına sonuç sayısı (opsiyonel, varsayılan: 10)\n\n**Authorization:** Bearer Token gerekli"
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/mobile/query-bill-detailed?page=1&limit=10",
+									"host": ["{{baseUrl}}"],
+									"path": ["mobile", "query-bill-detailed"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"page\": 1,\n    \"pageSize\": 10,\n    \"results\": []\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Web",
+			"description": "Web uygulama API endpoint'leri",
+			"item": [
+				{
+					"name": "Pay Bill",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/web/pay-bill",
+							"host": ["{{baseUrl}}"],
+							"path": ["web", "pay-bill"]
+						},
+						"description": "Belirtilen abone ve aya ait faturayı öder.\n\n**Gerekli Parametreler:**\n- `subscriberNo`: Abone numarası\n- `month`: Ay (format: YYYY-MM)\n\n**Not:** Bu endpoint token gerektirmez."
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/web/pay-bill",
+									"host": ["{{baseUrl}}"],
+									"path": ["web", "pay-bill"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"paymentStatus\": \"Successful\"\n}"
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscriberNo\": \"9999\",\n    \"month\": \"2024-01\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/web/pay-bill",
+									"host": ["{{baseUrl}}"],
+									"path": ["web", "pay-bill"]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"paymentStatus\": \"Error\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Admin - Add Bill",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\",\n    \"billTotal\": 150.50\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/web/admin/add-bill",
+							"host": ["{{baseUrl}}"],
+							"path": ["web", "admin", "add-bill"]
+						},
+						"description": "Yeni bir fatura oluşturur.\n\n**Gerekli Parametreler:**\n- `subscriberNo`: Abone numarası\n- `month`: Ay (format: YYYY-MM)\n- `billTotal`: Fatura tutarı\n\n**Authorization:** Bearer Token gerekli"
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"subscriberNo\": \"1001\",\n    \"month\": \"2024-01\",\n    \"billTotal\": 150.50\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/web/admin/add-bill",
+									"host": ["{{baseUrl}}"],
+									"path": ["web", "admin", "add-bill"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"transactionStatus\": \"Successful\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Admin - Batch Upload Bills (CSV)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "CSV dosyası seçin"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/web/admin/batch-upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["web", "admin", "batch-upload"]
+						},
+						"description": "CSV dosyası ile toplu fatura yükler.\n\n**Gerekli Parametreler:**\n- `file`: CSV dosyası (form-data)\n\n**Authorization:** Bearer Token gerekli\n\n**CSV Formatı:** Dosyanın beklenen formatı için örnek CSV dosyasına bakın."
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "bills.csv"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/web/admin/batch-upload",
+									"host": ["{{baseUrl}}"],
+									"path": ["web", "admin", "batch-upload"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"transactionStatus\": \"Successful\"\n}"
+						},
+						{
+							"name": "No File",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{baseUrl}}/web/admin/batch-upload",
+									"host": ["{{baseUrl}}"],
+									"path": ["web", "admin", "batch-upload"]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"body": "{\n    \"transactionStatus\": \"Error\",\n    \"message\": \"CSV file not uploaded\"\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}
+
