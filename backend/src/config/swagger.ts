@@ -11,12 +11,10 @@ const options: swaggerJsdoc.Options = {
         name: "Ahmet Kemal Biliciler",
       },
     },
-
-    //Swagger should point to the API Gateway invoke URL
     servers: [
       {
-        url: "http://localhost:8000/api/v1", // All requests will go to the API Gateway
-        description: "Local API Gateway",
+        url: "/api/v1",
+        description: "API Gateway",
       },
     ],
     components: {
@@ -34,7 +32,6 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  // Which files to read comments from?
   apis: ["./src/routes/*.ts", "./src/controllers/*.ts"],
 };
 
