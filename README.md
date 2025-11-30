@@ -73,15 +73,11 @@ erDiagram
         Json headers
         DateTime timestamp
     }
-
-
-
-Bill: Stores billing information.
-
-User: Stores authentication credentials (for Admin/Banking apps).
-
-RequestLog: Stores all traffic logs required for auditing and rate limiting.
 ```
+
+- **Bill:** Stores billing information.
+- **User:** Stores authentication credentials (for Admin/Banking apps).
+- **RequestLog:** Stores all traffic logs required for auditing and rate limiting.
 
 ## 💭 Assumptions
 
