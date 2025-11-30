@@ -43,14 +43,14 @@ The system uses a relational database model managed by Prisma.
 ```mermaid
 erDiagram
     User {
-        Int id PK
+        Int id
         String username
         String password
         String role "ADMIN | SUBSCRIBER"
     }
 
     Bill {
-        Int id PK
+        Int id
         String subscriberNo
         String month
         Float billTotal
@@ -61,7 +61,7 @@ erDiagram
     }
 
     RequestLog {
-        Int id PK
+        Int id
         String endpoint
         String method
         String subscriberNo
